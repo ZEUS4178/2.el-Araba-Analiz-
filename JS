@@ -1,0 +1,38 @@
+const analyzeBtn = document.getElementById('analyzeBtn');
+const resultDiv = document.getElementById('result');
+
+analyzeBtn.addEventListener('click', async () => {
+  const url = document.getElementById('listingUrl').value;
+  
+  if (!url) {
+    resultDiv.innerText = "Lütfen ilan linkini girin.";
+    return;
+  }
+
+  resultDiv.innerText = "Analiz ediliyor...";
+
+  try {
+    const response = await fetch("https://api.openai.com/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer YOUR_OPENAI_API_KEY" // Buraya kendi API key
+      },
+      body: JSON.stringify({
+        model: "gpt-4",
+        messages: [
+          { role: "system", content: "Sen bir ikinci el araç değerleme uzmanısın." },
+          { role: "user", content: `Bu ilan linkini analiz et ve fiyatın uygun mu, pahalı mı, ucuz mu olduğunu söyle: ${url}` }
+        ]
+      })
+    });
+
+    const data = await response.json();
+    const analysis = data.choices[0].message.content;
+    resultDiv.innerText = analysis;
+
+  } catch (err) {
+    console.error(err);
+    resultDiv.innerText = "Bir hata oluştu. Lütfen tekrar deneyin.";
+  }
+});
